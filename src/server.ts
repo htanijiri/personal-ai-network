@@ -4,7 +4,8 @@ import path from "path";
 import { askGemini } from "./gemini";
 import { config, missingEnv } from "./config";
 import { handleWebhook, pushText } from "./line";
-import { activities, runMatching, users } from "./match";
+import { activities, notifyMatch, runMatching, users } from "./match";
+import type { MatchResult } from "./types";
 
 const app = express();
 
@@ -37,9 +38,22 @@ app.post("/api/line/test", async (_req, res) => {
 });
 
 // Phase 4〜5: マッチングデモ開始（発表者用トリガー。本番は Cloud Scheduler 等で自律起動）
-app.post("/api/match", async (_req, res) => {
+// デモ画面はログを表示し終えてから /api/line/push で送るため、notify: false を指定する
+app.post("/api/match", async (req, res) => {
   const match = await runMatching();
-  res.json({ success: true, match });
+  const notified = req.body?.notify === false ? [] : await notifyMatch(match);
+  res.json({ success: true, match, notified });
+});
+
+// マッチング結果を LINE に送る（デモ画面がログ表示の後に呼ぶ）
+app.post("/api/line/push", async (req, res) => {
+  const match = req.body?.match as MatchResult | undefined;
+  if (!match || !Array.isArray(match.notifications) || !Array.isArray(match.matchedUserIds)) {
+    res.status(400).json({ success: false, error: "body.match（notifications と matchedUserIds を含む）が必要です" });
+    return;
+  }
+  const notified = await notifyMatch(match);
+  res.json({ success: true, notified });
 });
 
 // エラーハンドラ：原因がわかるようにサーバーログへ出す

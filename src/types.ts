@@ -31,8 +31,14 @@ export type Activity = {
 
 // デモ画面に表示する「AI秘書の判断サマリー」（Chain of Thought ではない）
 export type SecretaryLog = {
-  speaker: string; // 例: "Hiroshi AI", "Secretary Network"
+  speaker: string; // 例: "Dさん AI", "Secretary Network"
   message: string;
+};
+
+// 参加者1人分の LINE 提案文
+export type MatchNotification = {
+  userId: string;
+  text: string;
 };
 
 // Gemini が返すマッチング結果（BRIEF §10）
@@ -45,5 +51,6 @@ export type MatchResult = {
   reason: string;
   conversationTopics: string[];
   confidence: number;
+  notifications: MatchNotification[]; // 参加者ごとに LINE で届ける提案文（ボタン文言は含まない）
   logs: SecretaryLog[];
 };

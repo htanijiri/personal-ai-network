@@ -36,6 +36,7 @@
 - データは固定 JSON（`src/data/`）。DB を作るせいでデモ完成が遅れるなら作らない。
 - Gemini の出力は必ず JSON（structured output / responseSchema を使う）。形は `src/types.ts` の `MatchResult`（BRIEF §10 に AI秘書ログ `logs` を足したもの）。
 - Gemini / LINE の API エラーは、原因がわかる形でサーバーログに出す。
+- **`src/data/users.json` には実在の LINE ユーザーIDが入る。GitHub には絶対に上げない。** `git update-index --skip-worktree` を設定してあるので `git add -A` でも入らないが、解除したり、`git add -f` などで強制的に追加したりしない。push 前には `git diff --cached --name-only` に `users.json` がないことを確認する。
 - 秘密情報をソースコードに書かない。`.env` と `env.yaml` は Git 管理外。環境変数を増やすときは `.env.example` と `src/config.ts` を両方更新する。
 - 未実装の関数は `NotImplementedError` を投げる（サーバーが 501 を返す）。実装箇所には `TODO(Phase N)` コメントがある。
 
@@ -57,5 +58,12 @@
 - Cloud Run では **`/healthz` など末尾が `z` のパスが Google のフロントエンドに予約されていてアプリに届かない**。動作確認用のパスは `/health`。
 - Gemini のモデルは `gemini-3.6-flash`。`gemini-2.5-flash` は新規ユーザーには使えない（404）。モデルを変えるときは、使えるモデルを API の `models.list()` で一覧して確認してから `GEMINI_MODEL` を変える。
 - 本番の API を curl で POST するときは `-H "Content-Type: application/json" -d '{}'` を付ける。本文なしだと Google のフロントエンドが 411 を返す。
+- LINE の提案文は、Gemini が参加者ごとに作る（`notifications`）。宛先は `lineUserId`、空なら `LINE_DEMO_USER_ID`。同じ宛先には1通だけ送る（`src/match.ts` の `planNotifications`）。
+- デモ画面は `/api/match` に `{"notify": false}` を渡してログを表示し、表示し終えてから `/api/line/push` で送る（画面の後にスマホが鳴る演出）。この順番を崩さない。
+- Gemini の文字列を画面に出すときは、必ず `escapeHtml` を通す。
+- HTML や CSS をまとめて書くときは、Git Bash のヒアドキュメントではなく Write ツールを使う（ヒアドキュメントを続けると構文解釈エラーになったことがある）。
+- 画面の確認は、スクラッチパッドの puppeteer-core ＋ インストール済みの Chrome（`C:\Program Files\Google\Chrome\Application\chrome.exe`）で行える。LINE 送信はモック応答にして、スマホへの通知を増やさない。
+- **LINE のユーザーIDはプロバイダーごとに違う。** 別のプロバイダーや別の Bot で取得した ID には、MukoBot（ベーシックID `@245wynrk`）から送れない（400「Failed to send messages」）。フォロワー一覧 API は 403 で使えない。
+- 現在のデモは **Dさん（発表者の LINE）にだけ送る**構成。`users.json` は Dさん以外の `lineUserId` を空にしてある。
+- 一次審査を通過したら、LIFF で参加者の ID を取得して実機デモ（複数人への送信）を確認する予定。同じプロバイダーに LINE ログインチャネルを作り、LIFF アプリ（エンドポイント `/liff`、scope `profile`）を追加し、公開する。Webhook はユーザーの事情で使わない。
 - LINE Webhook（`/line/webhook`）は署名検証のため `express.raw()` で受ける。`express.json()` より前に登録する順番を崩さない。
-- デモでは各ユーザーの `lineUserId` が空なので、提案は `LINE_DEMO_USER_ID`（発表者のスマホ）にまとめて届く。

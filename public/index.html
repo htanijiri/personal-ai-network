@@ -4,44 +4,67 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>2036 Personal AI Network</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header>
-    <p class="eyebrow">2036 · AI Secretary Network</p>
-    <h1>Personal AI Network</h1>
-    <p class="tagline">探さない。頼まない。AIが機会を連れてくる。</p>
+  <header class="top">
+    <div>
+      <p class="eyebrow">2036 · AI Secretary Network</p>
+      <h1>Personal AI Network</h1>
+      <p class="tagline">探さない。頼まない。AIが機会を連れてくる。</p>
+    </div>
+    <div id="status" class="status" data-state="idle">
+      <span class="dot"></span><span id="status-text">待機中</span>
+    </div>
   </header>
 
   <main>
-    <!-- 画面1：ユーザー一覧（Phase 5 で見た目を整える） -->
+    <!-- 画面1：ユーザー一覧 -->
     <section>
-      <h2>AI秘書ネットワーク上のユーザー</h2>
-      <div id="users" class="cards">読み込み中…</div>
+      <div class="section-head">
+        <h2>ネットワーク上のAI秘書</h2>
+        <p class="note">各AI秘書が把握している本人の状況（デモ用データ）</p>
+      </div>
+      <div id="users" class="cards"></div>
     </section>
 
-    <!-- 画面3：AI秘書ログ（Phase 5） -->
-    <section>
-      <h2>AI秘書ログ</h2>
-      <div id="logs" class="logs">まだ探索は始まっていません。</div>
-    </section>
+    <div class="grid">
+      <!-- 画面3：AI秘書ログ（判断サマリー） -->
+      <section>
+        <div class="section-head">
+          <h2>AI秘書ログ</h2>
+          <p class="note">秘書同士の調整の判断サマリー</p>
+        </div>
+        <ol id="logs" class="logs">
+          <li class="placeholder">まだ探索は始まっていません。</li>
+        </ol>
+      </section>
 
-    <!-- 画面4：成立結果（Phase 5） -->
-    <section>
-      <h2>成立した体験</h2>
-      <div id="result">—</div>
-    </section>
+      <!-- 画面4：成立結果 -->
+      <section>
+        <div class="section-head">
+          <h2>成立した体験</h2>
+        </div>
+        <div id="result" class="result empty">提案が成立すると、ここに表示されます。</div>
+      </section>
+    </div>
 
     <!-- 画面2：発表者・開発者用コントロール（一般ユーザー向けではない） -->
-    <section class="dev">
-      <h2>発表者用コントロール</h2>
+    <details class="dev">
+      <summary>発表者用コントロール</summary>
+      <p class="note">
+        本番ではユーザーは何も操作しません。Cloud Scheduler 等から自律的に起動する処理を、デモの好きなタイミングで始めるためのトリガーです。
+        キーボードの <kbd>S</kbd> でも開始、<kbd>R</kbd> でリセットできます。
+      </p>
       <div class="buttons">
+        <button id="start" class="primary">マッチングデモ開始</button>
+        <button id="reset">リセット</button>
         <button data-endpoint="/api/gemini/test">Gemini 疎通確認</button>
         <button data-endpoint="/api/line/test">LINE Push 疎通確認</button>
-        <button data-endpoint="/api/match" class="primary">マッチングデモ開始</button>
       </div>
       <pre id="output">—</pre>
-    </section>
+    </details>
   </main>
 
   <script src="/app.js"></script>

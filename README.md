@@ -60,6 +60,16 @@
 | 環境変数を追加する | `.env.example` と `src/config.ts` |
 | Google Calendar / Sheets 連携（Phase 7） | `src/calendar.ts` / `src/sheets.ts` を新規作成し `src/match.ts` から呼ぶ |
 
+### 参加者それぞれの LINE に送る（デモ用の設定）
+
+- `src/data/users.json` の各ユーザーの `lineUserId` に LINE ユーザーID（`U` から始まる33文字）を入れると、その人に届く。
+- `lineUserId` が空の人は `LINE_DEMO_USER_ID` 宛て。同じ宛先には1通だけ送る。
+- 文面は Gemini が参加者ごとに作る（`MatchResult.notifications`）。理由は本人の条件に合わせて変わる。
+- 送る相手は、Bot を友だち追加している必要がある。
+- **ユーザーIDは GitHub に上げない。** ローカルでは `git update-index --skip-worktree src/data/users.json` を設定してあり、`users.json` の変更はコミット対象にならない。Cloud Run へのデプロイ（`--source .`）ではローカルのファイルがそのまま使われる。
+  - 設定の確認：`git ls-files -v | grep '^S'`
+  - `users.json` のデモデータ自体を GitHub に反映したいときは、ID を消してから `git update-index --no-skip-worktree src/data/users.json` で解除してコミットする。
+
 ---
 
 ## 開発フェーズと進捗
@@ -70,9 +80,9 @@
 |---|---|---|---|
 | 1 | Cloud Run で Hello World | `src/server.ts`, `public/` | ✅ Cloud Run デプロイ確認済み |
 | 2 | Gemini 接続 | `src/gemini.ts` の `askGemini` | ✅ Cloud Run で疎通確認済み |
-| 3 | LINE Push | `src/line.ts` の `pushText` | ⬜ |
-| 4 | ユーザー JSON + Gemini マッチング | `src/gemini.ts` の `generateMatch`, `src/match.ts` | ⬜ |
-| 5 | デモ画面の AI 秘書ログ | `public/app.js` | ⬜ |
+| 3 | LINE Push | `src/line.ts` の `pushText` | ✅ スマホで着信確認済み |
+| 4 | ユーザー JSON + Gemini マッチング | `src/gemini.ts` の `generateMatch`, `src/match.ts` | ✅ Cloud Run で確認済み（テキスト通知） |
+| 5 | デモ画面の AI 秘書ログ | `public/app.js` | ✅ Cloud Run で画面操作まで確認済み |
 | 6 | LINE 承認（Postback） | `src/line.ts` の `pushMatchProposal`, `handleWebhook` | ⬜ |
 | 7 | Calendar / Sheets / Flex Message | 新規ファイル | ⬜ |
 
@@ -122,10 +132,18 @@ npm run dev            # http://localhost:8080
 | GET | `/api/users` | デモ用ユーザーと体験候補 | 1 |
 | POST | `/api/gemini/test` | Gemini 疎通確認（発表者用） | 2 |
 | POST | `/api/line/test` | LINE に「Hello from Personal AI Secretary」を送信（発表者用） | 3 |
-| POST | `/api/match` | マッチング生成 + LINE 提案送信（発表者用デモトリガー） | 4 |
+| POST | `/api/match` | マッチング生成 + LINE 提案送信（発表者用デモトリガー）。body に `{"notify": false}` を渡すと送信しない | 4 |
+| POST | `/api/line/push` | body の `match` を参加者の LINE に送信（デモ画面がログ表示の後に呼ぶ） | 5 |
 | POST | `/line/webhook` | LINE Webhook（Postback: accept / decline） | 6 |
 
 > `/api/match` などの発表者用ボタンは本番のユーザー機能ではありません。本番では Cloud Scheduler 等から自律的に起動する想定です。
+
+### デモ画面の操作（発表者用）
+
+- 画面下部の「発表者用コントロール」を開き、「マッチングデモ開始」を押す。キーボードの `S` でも開始、`R` でリセットできる（コントロールを閉じたままでも効く）。
+- 流れ：AI秘書が探索中の表示（Gemini の応答待ち・約15秒）→ AI秘書ログを1件ずつ表示 → 参加者のカードを強調・不参加は薄く → 成立結果 → LINE に送信。
+- ログを出す間隔は `public/app.js` の `LOG_INTERVAL_MS` で変えられる。
+- 本番の API を curl で POST するときは `-H "Content-Type: application/json" -d '{}'` を付ける（本文なしだと 411 になる）。
 
 ---
 
