@@ -1,0 +1,7 @@
+[
+  { "id": "karaoke-shibuya", "name": "カラオケ", "tags": ["音楽", "カラオケ"], "area": "渋谷", "groupSizeMin": 2, "groupSizeMax": 8, "durationMinutes": 120 },
+  { "id": "live-house-shimokita", "name": "ライブハウスで対バン鑑賞", "tags": ["音楽", "ライブ"], "area": "下北沢", "groupSizeMin": 1, "groupSizeMax": 6, "durationMinutes": 150 },
+  { "id": "genai-meetup", "name": "生成AI勉強会", "tags": ["生成AI", "勉強会", "テック"], "area": "渋谷", "groupSizeMin": 3, "groupSizeMax": 20, "durationMinutes": 120 },
+  { "id": "boardgame-cafe", "name": "ボードゲームカフェ", "tags": ["ボードゲーム", "囲碁"], "area": "横浜", "groupSizeMin": 2, "groupSizeMax": 6, "durationMinutes": 180 },
+  { "id": "museum-ueno", "name": "美術館めぐり", "tags": ["美術館", "アート"], "area": "上野", "groupSizeMin": 1, "groupSizeMax": 4, "durationMinutes": 120 }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "id": "hiroshi",
+    "displayName": "Hiroshi",
+    "lineUserId": "",
+    "freeSlots": [
+      { "start": "2026-09-14T13:00:00+09:00", "end": "2026-09-14T18:00:00+09:00" }
+    ],
+    "interests": ["King Gnu", "カラオケ", "生成AI"],
+    "socialPreferences": { "firstMeetingOk": true, "preferredGroupSizeMin": 3, "preferredGroupSizeMax": 4 },
+    "area": "東京"
+  },
+  {
+    "id": "userA",
+    "displayName": "Aさん",
+    "lineUserId": "",
+    "freeSlots": [
+      { "start": "2026-09-14T14:00:00+09:00", "end": "2026-09-14T17:00:00+09:00" }
+    ],
+    "interests": ["King Gnu", "音楽", "カラオケ"],
+    "socialPreferences": { "firstMeetingOk": true, "preferredGroupSizeMin": 2, "preferredGroupSizeMax": 5 },
+    "area": "東京"
+  },
+  {
+    "id": "userB",
+    "displayName": "Bさん",
+    "lineUserId": "",
+    "freeSlots": [
+      { "start": "2026-09-14T13:00:00+09:00", "end": "2026-09-14T18:00:00+09:00" }
+    ],
+    "interests": ["音楽", "ライブ", "少人数交流"],
+    "socialPreferences": { "firstMeetingOk": true, "preferredGroupSizeMin": 2, "preferredGroupSizeMax": 4 },
+    "area": "東京"
+  },
+  {
+    "id": "userC",
+    "displayName": "Cさん",
+    "lineUserId": "",
+    "freeSlots": [
+      { "start": "2026-09-14T09:00:00+09:00", "end": "2026-09-14T12:00:00+09:00" }
+    ],
+    "interests": ["囲碁", "ボードゲーム", "美術館"],
+    "socialPreferences": { "firstMeetingOk": false, "preferredGroupSizeMin": 2, "preferredGroupSizeMax": 2 },
+    "area": "神奈川"
+  }
+]
