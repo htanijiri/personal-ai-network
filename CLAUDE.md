@@ -63,7 +63,7 @@
 - Gemini の文字列を画面に出すときは、必ず `escapeHtml` を通す。
 - HTML や CSS をまとめて書くときは、Git Bash のヒアドキュメントではなく Write ツールを使う（ヒアドキュメントを続けると構文解釈エラーになったことがある）。
 - 画面の確認は、スクラッチパッドの puppeteer-core ＋ インストール済みの Chrome（`C:\Program Files\Google\Chrome\Application\chrome.exe`）で行える。LINE 送信はモック応答にして、スマホへの通知を増やさない。
-- **LINE のユーザーIDはプロバイダーごとに違う。** 別のプロバイダーや別の Bot で取得した ID には、MukoBot（ベーシックID `@245wynrk`）から送れない（400「Failed to send messages」）。フォロワー一覧 API は 403 で使えない。
-- 現在のデモは **Dさん（発表者の LINE）にだけ送る**構成。`users.json` は Dさん以外の `lineUserId` を空にしてある。
-- 一次審査を通過したら、LIFF で参加者の ID を取得して実機デモ（複数人への送信）を確認する予定。同じプロバイダーに LINE ログインチャネルを作り、LIFF アプリ（エンドポイント `/liff`、scope `profile`）を追加し、公開する。Webhook はユーザーの事情で使わない。
+- **LINE のユーザーIDはプロバイダーごとに違う。** 別のプロバイダーや別の Bot で取得した ID には、MukoBot（ベーシックID `@245wynrk`）から送れない（400「Failed to send messages」）。フォロワー一覧 API は 403 で使えない。MukoBot 用の ID は、Webhook のログから取る（Bot にメッセージを送ってもらい、`[line/webhook] event=message userId=…` と本文で見分ける）。
+- 現在のデモは、`users.json` に Dさん（= `LINE_DEMO_USER_ID`、発表者）・Aさん・Bさん・Cさんの ID が入っていて、**マッチした人それぞれの LINE に本人向けの提案が届く**構成（本番で3人への送信を確認済み）。Dさんだけに戻すときは、Dさん以外の `lineUserId` を空にして再デプロイする。
+- Webhook は有効（URL は `/line/webhook`、署名検証はまだしていない。ログに出すだけ）。
 - LINE Webhook（`/line/webhook`）は署名検証のため `express.raw()` で受ける。`express.json()` より前に登録する順番を崩さない。
