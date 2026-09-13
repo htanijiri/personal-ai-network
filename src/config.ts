@@ -4,7 +4,7 @@ import "dotenv/config";
 export const config = {
   port: Number(process.env.PORT ?? 8080),
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
-  geminiModel: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
+  geminiModel: process.env.GEMINI_MODEL ?? "gemini-3.6-flash",
   lineChannelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN ?? "",
   lineChannelSecret: process.env.LINE_CHANNEL_SECRET ?? "",
   lineDemoUserId: process.env.LINE_DEMO_USER_ID ?? "",

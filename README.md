@@ -68,8 +68,8 @@
 
 | Phase | 内容 | 主なファイル | 状態 |
 |---|---|---|---|
-| 1 | Cloud Run で Hello World | `src/server.ts`, `public/` | ✅ 雛形あり（デプロイ確認待ち） |
-| 2 | Gemini 接続 | `src/gemini.ts` の `askGemini` | ⬜ |
+| 1 | Cloud Run で Hello World | `src/server.ts`, `public/` | ✅ Cloud Run デプロイ確認済み |
+| 2 | Gemini 接続 | `src/gemini.ts` の `askGemini` | ✅ Cloud Run で疎通確認済み |
 | 3 | LINE Push | `src/line.ts` の `pushText` | ⬜ |
 | 4 | ユーザー JSON + Gemini マッチング | `src/gemini.ts` の `generateMatch`, `src/match.ts` | ⬜ |
 | 5 | デモ画面の AI 秘書ログ | `public/app.js` | ⬜ |
@@ -103,13 +103,13 @@ npm run dev            # http://localhost:8080
 | 変数 | 用途 | 入手先 |
 |---|---|---|
 | `GEMINI_API_KEY` | Gemini API キー | Google AI Studio |
-| `GEMINI_MODEL` | 使用モデル（省略時 `gemini-2.5-flash`） | — |
+| `GEMINI_MODEL` | 使用モデル（省略時 `gemini-3.6-flash`） | — |
 | `LINE_CHANNEL_ACCESS_TOKEN` | Push / Reply 送信 | LINE Developers > Messaging API 設定 > チャネルアクセストークン（長期） |
 | `LINE_CHANNEL_SECRET` | Webhook の署名検証 | LINE Developers > チャネル基本設定 |
 | `LINE_DEMO_USER_ID` | デモの通知先 | LINE Developers > チャネル基本設定 > あなたのユーザーID |
 | `GOOGLE_CLOUD_PROJECT` | Calendar / Sheets 利用時のみ | Google Cloud コンソール |
 
-**`.env` は絶対に Git にコミットしないでください。** 未設定の変数は起動時にログへ警告が出ます（`GET /healthz` でも確認できます）。
+**`.env` は絶対に Git にコミットしないでください。** 未設定の変数は起動時にログへ警告が出ます（`GET /health` でも確認できます）。
 
 ---
 
@@ -118,7 +118,7 @@ npm run dev            # http://localhost:8080
 | メソッド | パス | 内容 | Phase |
 |---|---|---|---|
 | GET | `/` | デモ画面 | 1 |
-| GET | `/healthz` | 動作確認・未設定の環境変数一覧 | 1 |
+| GET | `/health` | 動作確認・未設定の環境変数一覧 | 1 |
 | GET | `/api/users` | デモ用ユーザーと体験候補 | 1 |
 | POST | `/api/gemini/test` | Gemini 疎通確認（発表者用） | 2 |
 | POST | `/api/line/test` | LINE に「Hello from Personal AI Secretary」を送信（発表者用） | 3 |
@@ -157,7 +157,7 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 
 ```yaml
 GEMINI_API_KEY: "xxxx"
-GEMINI_MODEL: "gemini-2.5-flash"
+GEMINI_MODEL: "gemini-3.6-flash"
 LINE_CHANNEL_ACCESS_TOKEN: "xxxx"
 LINE_CHANNEL_SECRET: "xxxx"
 LINE_DEMO_USER_ID: "Uxxxx"

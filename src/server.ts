@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "../public")));
 
 // Phase 1: 動作確認
-app.get("/healthz", (_req, res) => {
+app.get("/health", (_req, res) => {
   res.json({ ok: true, missingEnv: missingEnv() });
 });
 
