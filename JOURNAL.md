@@ -305,8 +305,99 @@
 - ユーザーの指示で、項目28〜29 の記録と、CLAUDE.md の書き直し（Webhook で ID を取る方法、4人分の ID が入った今の構成、Webhook が有効なこと）をコミットし、`main` に push した。
 - `users.json` / `.env` / `env.yaml` がステージされていないこと、差分に API キー・トークン・LINE ユーザーIDの全体がないこと（伏せ字のみ）を確認した。
 
+### 31. 技術面の Marp スライドを作った
+
+- ユーザーの依頼で、技術面だけに絞った6枚の Marp スライド `docs/tech-slides.md` を作った。
+  1. 表紙（技術スタックのチップ付き）
+  2. システム構成（トリガー → Cloud Run → Gemini → LINE → 参加者、データ・デプロイ・秘密情報の扱い）
+  3. AI の活かし方（1回の呼び出しで返す JSON の形、構造化出力・propertyOrdering・判断ルール・応答の検証）
+  4. デモの処理フロー（`/api/match` → ログ表示 → `/api/line/push` → `planNotifications` → 部分失敗への対策）
+  5. 実施したことと、ハマりどころ（Phase 1〜5 と実機3台への送信、404/429/411/400 の原因と対処）
+  6. 次の技術ステップ（LINE で参加・見送り、デモの安定化、Cloud Scheduler、Calendar/Firestore 連携）
+- デザイン：デモ画面と同じダークトーン（背景 #0b0f14、アクセント #7ee0c3）。Noto Sans JP / JetBrains Mono。`<style>` とクラス指定（`_class`）だけで作ったので、HTML を有効にしなくても表示できる。
+- LINE のユーザーID や API キーなどの秘密情報は載せていない。
+- 確認：スクラッチパッドに Marp CLI（v4.5.1）を入れ、Chrome で PNG に書き出して目視した。
+  - 1回目の崩れ（コード枠の間延び、チップの折り返し、インラインコードの途中改行）を CSS で直した。
+  - 2回目でもカードの見出しと本文の間に空行が残り、1枚目のカードだけ上端がずれていた。原因は、Marp が改行を `<br>` にするため、ブロック表示にした見出しの後ろに空行ができることと、標準テーマの `li + li` の余白。カード内の `br` を非表示にし、`li` の margin を 0 にして直した。
+  - 3回目の書き出しが180秒以上止まった（PNG は1枚も出ていない）。止まっていた Marp CLI のプロセスを終了させ、`--browser-timeout 120` を付けて書き出し直すと成功した。6枚とも崩れがないことを目視で確認した。
+
+### 32. Marp スライドを PDF に書き出した
+
+- ユーザーの依頼で、`docs/tech-slides.md` を Marp CLI（スクラッチパッドに導入済みの v4.5.1、Chrome 使用）で PDF に書き出した。
+  - 出力：`docs/tech-slides.pdf`（約885KB）
+  - 前回の書き出しが止まったことがあるので、`timeout 240` と `--browser-timeout 120` を付けて実行した。問題なく終わった。
+- 確認（Read ツールで PDF を画像表示する pdftoppm が無かったため、別の方法で確認した）：
+  - PDF の中身を解析：6ページ、ページサイズ 960×540pt（16:9）。
+  - スクラッチパッドに pypdfium2 と Pillow を入れて、PDF の各ページを PNG にして目視した。6ページとも、事前に確認した PNG 版と同じ見た目で、本文のゴシック体・コードの等幅フォント・レイアウトに崩れはなかった。
+  - 最初の解析で埋め込みフォントが `BIZ-UDGothic` しか見つからなかったのは、圧縮されたオブジェクトを一部しか展開できていなかったため。実際の表示では、指定したフォントが使われていた。
+
+### 33. スライドから「クレジット残高0」の件を削除し、PDF を作り直した
+
+- ユーザーの指示で、5枚目「実施したことと、ハマりどころ」の表から「Gemini が 429 / 前払いクレジットの残高が0 / AI Studio でチャージ」の行を削除した（表は4行になった）。
+- `docs/tech-slides.pdf` を書き出し直した（約872KB）。
+  - **ハマったこと**：1回目は、同じコマンドに続けた Python のヒアドキュメントを Marp CLI が標準入力として読み込み、待ち続けて `timeout` で打ち切られた（PDF は古いまま）。`--no-stdin` と `< /dev/null` を付けて、別のコマンドで実行したら成功した。残ったプロセスはなかった。
+  - 新しい PDF（6ページ）の5ページ目を画像にして確認した。クレジットの行がなくなって表は4行になり、レイアウトの崩れもない。
+
+### 34. スライド2ページ目（システム構成）だけを1枚の PDF にした
+
+- ユーザーの依頼で、`docs/tech-slides.pdf` の2ページ目を切り出し、`docs/tech-slides-system-architecture.pdf` を作った。
+- 方法：スクラッチパッドの pypdfium2 で、元の PDF から2ページ目をそのまま新しい PDF に取り込んだ（再レンダリングしていないので、見た目は元の PDF と同じ）。
+- 確認：1ページ、960×540pt（16:9）、約242KB。画像にして、「システム構成」のページであること（流れ図とデータ・デプロイ・秘密情報のカード）を目視した。
+- 注意：元のスライド（.md）を直したときは、`tech-slides.pdf` を書き出し直してから、このファイルも切り出し直す必要がある。
+
+### 35. システム構成の1枚 PDF を、ページ番号なしで作り直した
+
+- ユーザーの依頼（1枚ものとして使う）で、右下のページ番号「2」を消した。
+- 方法：元の `docs/tech-slides.md` は変えず、スクラッチパッドに「設定部分（front matter）＋2枚目だけ」の `system-architecture.md` を作り、`paginate: false` にして Marp CLI で PDF に書き出した（`--no-stdin` と `< /dev/null` 付き）。
+- 出力：`docs/tech-slides-system-architecture.pdf` を上書き（約180KB）。前の版はページを抜き出したものだったが、今回は1枚だけを直接書き出したもの。
+- 確認：1ページ、960×540pt。画像にして、右下のページ番号が消えていること、流れ図と3枚のカードのレイアウトが元と同じであることを目視した。
+- 注意：元のスライドの2枚目を直したら、同じ手順でこのファイルも作り直す。
+
+### 36. ハッカソンの結果：一次審査で落選
+
+- ユーザーから報告：一次審査で落選し、発表には進まなかった。
+- 気づいた点：本番の Cloud Run はまだ公開中。`GET /api/users` は `users.json` をそのまま返すので、実在の LINE ユーザーIDが外から見える可能性がある。`POST /api/line/push` も認証なしで任意の文面を送れる。実際に見えるかを確認し、対応をユーザーに相談する。
+- 確認結果：本番の `GET /api/users` が HTTP 200 で、**4人分の LINE ユーザーIDをそのまま返していた**（Dさん `Ueeab…`、Aさん `Uafa4…`、Bさん `U2199…`、Cさん `U80ac…`）。公開を止めるか、サービスを消すか、ID を空にして再デプロイするかをユーザーに相談する。
+
+## 2026-09-14
+
+### 37. Cloud Run のサービスを削除した
+
+- ユーザーの判断で、LINE ユーザーIDの公開と、認証なしの送信 API を止めるため、`gcloud run services delete personal-ai-network --region asia-northeast1` を実行した。
+- 確認：
+  - `gcloud run services list`（asia-northeast1）→ 0件。
+  - 旧 URL の `GET /api/users` と `POST /line/webhook` → どちらも HTTP 404。ID の公開と送信 API は止まった。
+- 残っているもの：Artifact Registry のリポジトリ `cloud-run-source-deploy`（216MB）に、ビルド済みイメージ `personal-ai-network` がある。デプロイ時の `users.json`（実在の LINE ユーザーID入り）を含むので、非公開だが消すかどうかをユーザーに相談する。
+- ほかに残っている作業：スクラッチパッドの `line-ids.json` とローカルの `users.json` の ID の削除、LINE Developers で Webhook を OFF（ユーザーの操作）、スライド・PDF・JOURNAL のコミット。
+
+### 38. コンテナイメージ（Artifact Registry）を削除した
+
+- ユーザーの指示（使う予定がない）で、`gcloud artifacts repositories delete cloud-run-source-deploy --location asia-northeast1` を実行し、イメージ `personal-ai-network` ごとリポジトリを削除した。`gcloud artifacts repositories list` で0件になったことを確認した。
+- **別の残りを見つけた**：Cloud Storage のバケット `run-sources-personal-ai-network-508503-asia-northeast1` に、ソースデプロイでアップロードしたソースの zip が10個（合計約546KB）残っている。
+  - 最新の zip をスクラッチパッドにダウンロードして中身を確認：24ファイル。`src/data/users.json`（実在の LINE ユーザーID入り）を含む。`.env` / `env.yaml` は含まれていない（`.gcloudignore` が効いていて、API キーなどはアップロードされていない）。`node_modules` も含まれない。
+  - ダウンロードした zip は確認後すぐに削除した。
+  - このバケットはコンテナイメージとは別物なので、消すかどうかをユーザーに確認する。
+- 補足：`<プロジェクトID>_cloudbuild` バケットは存在しなかった。
+
+### 39. ソースのバケットと、手元の LINE ユーザーIDを削除した
+
+- ユーザーの指示で、Cloud Storage のバケット `run-sources-personal-ai-network-508503-asia-northeast1` を中の zip（10個）ごと削除した（`gcloud storage rm --recursive`）。`gcloud storage buckets list` で何も出ないことを確認した。
+- 手元の ID を削除した：
+  - スクラッチパッドの `line-ids.json`（ID 取得スクリプトの出力）と、`webhook-logs.txt`（Cloud Run のログを書き出したもの。3人の完全な ID を含む）を削除した。スクラッチパッドの他のファイル（node_modules・pylib・画像・PDF を除く）に完全な ID が残っていないことも確認した。
+  - `src/data/users.json` の4人の `lineUserId` を空にした。skip-worktree のままなので、Git の差分には出ない。
+  - `dist/data/users.json`（ビルド時にコピーされた古い版。3人分の ID 入り）が残っていたので、ビルドし直して空の版に置き換えた。
+- 残している ID：`.env` と `env.yaml` の `LINE_DEMO_USER_ID`（ユーザー本人＝Dさんの ID）。アプリの設定値なので触っていない。
+- 補足：Cloud Run のサービスは削除したが、Cloud Logging には Webhook の受信ログ（ID と本文を含む）が保存期間（既定30日）のあいだ残る。
+
+### 40. ログは残す判断、Webhook の扱い、GitHub への push
+
+- ユーザーの判断：Cloud Logging の Webhook 受信ログ（LINE ユーザーID入り）は削除せず、保存期間が過ぎて自然に消えるのを待つ。
+- ユーザーから「Webhook を無効にしないと問題があるか」と質問された。回答：送り先のサービスはもうないので、MukoBot にメッセージが届いても LINE からの送信が 404 で失敗するだけ。セキュリティ上の実害はない。旧 URL はプロジェクト固有の番号を含み、他人が同じ URL を作ることはできない。ただし、LINE 側でエラーとして記録され、エラー通知を有効にしていればメールが届く可能性があるので、整理のために OFF を推奨した。
+- ユーザーの指示で、スライド（`docs/tech-slides.md`）、PDF 2つ（`docs/tech-slides.pdf`、`docs/tech-slides-system-architecture.pdf`）、JOURNAL.md、CLAUDE.md をコミットして `main` に push した（コミットは `git log` で確認できる）。
+- push 前に確認したこと：`users.json` / `.env` / `env.yaml` がステージされていない。ステージしたファイル（PDF を含む）に、API キー・トークン・チャネルシークレット・LINE ユーザーIDの完全な値が含まれていない。
+
 ### この時点で残っていること
 
-- [ ] Dさん・Aさん・Bさんのスマホに、本人向けの提案が届いたか確認してもらう
-- [ ] Phase 6（LINE で承認）はデモ対象外にしていた。Webhook が使えるようになったので、やるかどうか決める
-- [ ] Gemini の応答が遅い（14〜18秒）。デモの安定化で、失敗や遅延への対策（タイムアウト、再試行、事前に生成した結果への切り替えなど）を検討する
+- [ ] （推奨・任意）LINE Developers で Webhook を OFF にする（ユーザーの操作。放置しても実害はない）
+- Cloud Logging の Webhook 受信ログは、保存期間が過ぎて自然に消えるのを待つ（ユーザーの判断）
+- （ハッカソンは一次審査で終了。Phase 6、デモの安定化、実機での着信確認は、再開するときに改めて検討する）

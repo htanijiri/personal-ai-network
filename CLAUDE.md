@@ -2,6 +2,13 @@
 
 ハッカソン用プロトタイプ「2036 Personal AI Network」。仕様の原本は `BRIEF.md`、作業記録は `JOURNAL.md`、構成と手順は `README.md`。
 
+## 現状（2026-09-14）
+
+- ハッカソンは一次審査で落選し、終了した。
+- **Cloud Run のサービス、Artifact Registry のイメージ、Cloud Storage のソースバケットは削除済み。** 本番 URL は存在しない。再開するときは、下のデプロイ手順でデプロイし直す（URL は変わる可能性があるので、LINE の Webhook URL も設定し直す）。
+- `src/data/users.json` の `lineUserId` は4人とも空にした。複数人に送るには、Webhook のログから ID を取り直す必要がある。
+- GCP プロジェクト、Gemini API キー、LINE チャネル（MukoBot）は残っている。
+
 ## 作業記録（必ず守る）
 
 - **何か作業をしたら、そのたびに `JOURNAL.md` に記録する。** 後からやってきたことを追えるようにするため。
@@ -50,7 +57,7 @@
   gcloud run deploy personal-ai-network --source . --region asia-northeast1 --allow-unauthenticated --quiet
   ```
   環境変数を渡すときは `--env-vars-file env.yaml` を足す。
-- 本番 URL：https://personal-ai-network-1005286368657.asia-northeast1.run.app
+- 本番 URL：（サービス削除済み。旧 URL は https://personal-ai-network-1005286368657.asia-northeast1.run.app）
 - GitHub：https://github.com/htanijiri/personal-ai-network（公開リポジトリ。push 前に秘密情報がないか確認する）
 
 ## 注意点
@@ -64,6 +71,6 @@
 - HTML や CSS をまとめて書くときは、Git Bash のヒアドキュメントではなく Write ツールを使う（ヒアドキュメントを続けると構文解釈エラーになったことがある）。
 - 画面の確認は、スクラッチパッドの puppeteer-core ＋ インストール済みの Chrome（`C:\Program Files\Google\Chrome\Application\chrome.exe`）で行える。LINE 送信はモック応答にして、スマホへの通知を増やさない。
 - **LINE のユーザーIDはプロバイダーごとに違う。** 別のプロバイダーや別の Bot で取得した ID には、MukoBot（ベーシックID `@245wynrk`）から送れない（400「Failed to send messages」）。フォロワー一覧 API は 403 で使えない。MukoBot 用の ID は、Webhook のログから取る（Bot にメッセージを送ってもらい、`[line/webhook] event=message userId=…` と本文で見分ける）。
-- 現在のデモは、`users.json` に Dさん（= `LINE_DEMO_USER_ID`、発表者）・Aさん・Bさん・Cさんの ID が入っていて、**マッチした人それぞれの LINE に本人向けの提案が届く**構成（本番で3人への送信を確認済み）。Dさんだけに戻すときは、Dさん以外の `lineUserId` を空にして再デプロイする。
-- Webhook は有効（URL は `/line/webhook`、署名検証はまだしていない。ログに出すだけ）。
+- 仕組みとしては、`users.json` に ID を入れれば、マッチした人それぞれの LINE に本人向けの提案が届く（3人への送信を確認済み）。今は ID をすべて空にしてあるので、提案は `LINE_DEMO_USER_ID`（発表者）宛ての1通になる。
+- Webhook（`/line/webhook`）は署名検証をしておらず、ログに出すだけ。サービス削除後は送り先がないので、LINE 側の「Webhook の利用」は OFF にしておく。
 - LINE Webhook（`/line/webhook`）は署名検証のため `express.raw()` で受ける。`express.json()` より前に登録する順番を崩さない。
